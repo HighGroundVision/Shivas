@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "appInsights1": {
+      "type": "appInsights"
+    },
+    "cosmosdb1": {
+      "type": "cosmosdb",
+      "connectionId": "ShivasCosmosDB"
+    },
+    "storage1": {
+      "type": "storage",
+      "connectionId": "AzureWebJobsStorage"
+    }
+  }
+}
