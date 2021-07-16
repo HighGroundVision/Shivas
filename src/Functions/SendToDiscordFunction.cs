@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace HGV.Shivas.Fun
 {
@@ -20,24 +22,23 @@ namespace HGV.Shivas.Fun
         }
 
         [FunctionName(nameof(SendToDiscordFunctionRun))]
-        public void SendToDiscordFunctionRun([CosmosDBTrigger(
-            databaseName: "hgv-shivas",
-            collectionName: "reddit-by-title",
-            ConnectionStringSetting = "ShivasCosmosDB",
-            LeaseCollectionName = "leases", CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> input, ILogger log)
+        public void SendToDiscordFunctionRun(
+            [BlobTrigger("shivas/{id}.json", Connection = "AzureWebJobsStorage")]Stream stream, 
+            ILogger log)
         {
-            if(input is null)
+            if(stream is null)
                 return;
 
-            if(input.Count == 0) 
-                return;
-
-            foreach (var item in input)
+            using (var sr = new StreamReader(stream))
+            using (var reader = new JsonTextReader(sr))
             {
-                var url = item.GetPropertyValue<string>("url");
-                var msg = new {
-                    content = $"There is a new AD Post check it out! {url}",
-                };
+                var serializer = new JsonSerializer();
+                var doc = serializer.Deserialize<RedditDocument>(reader);
+
+                if(doc is null)
+                    return;
+
+                var msg = new { content = $"There is a new AD Post check it out! {doc.url}" };
                 this.client.PostAsJsonAsync(discordWebhook, msg);
             }
         }

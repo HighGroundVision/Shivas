@@ -1,15 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace HGV.Shivas.Fun
 {
     
-    public class RedditDocument
+    public class RedditDocument : IEquatable<RedditDocument>
     {
         public string id {get;set;}
         public string title {get;set;}
         public string url {get;set;}
+
+        public bool Equals([AllowNull] RedditDocument other)
+        {
+            return this.id == other?.id;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(id);
+        }
+
+        public static bool operator ==(RedditDocument left, RedditDocument right)
+        {
+            return EqualityComparer<RedditDocument>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(RedditDocument left, RedditDocument right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as RedditDocument);
+        }
     }
 
     public class RedditDocumentRoot

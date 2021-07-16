@@ -1,9 +1,12 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Blob;
+using Newtonsoft.Json;
 
 namespace HGV.Shivas.Fun
 {
@@ -11,24 +14,20 @@ namespace HGV.Shivas.Fun
     {
         [FunctionName(nameof(StoreRedditPostFunctionAdd))]
         public async Task StoreRedditPostFunctionAdd(
-            [QueueTrigger("shivas", Connection = "AzureWebJobsStorage")]RedditDocument newitem, 
-            [CosmosDB(
-                databaseName: "hgv-shivas",
-                collectionName: "reddit-by-title",
-                ConnectionStringSetting = "ShivasCosmosDB",
-                Id = "{id}",
-                PartitionKey = "{id}")]Document existingItem,
-            [CosmosDB(
-                databaseName: "hgv-shivas",
-                collectionName: "reddit-by-title",
-                ConnectionStringSetting = "ShivasCosmosDB")]IAsyncCollector<RedditDocument> collector,
+            [QueueTrigger("shivas", Connection = "AzureWebJobsStorage")]RedditDocument doc,
+            [Blob("shivas/{id}.json", FileAccess.ReadWrite, Connection = "AzureWebJobsStorage")] CloudBlockBlob blob,
             ILogger log
         )
         {
-            if(existingItem is null)
-            {
-                await collector.AddAsync(newitem);
-            }
+            if(doc is null)
+                return;
+
+            var result = await blob.ExistsAsync();
+            if(result == true)
+                return;
+            
+            var json = JsonConvert.SerializeObject(doc);
+            await blob.UploadTextAsync(json);
         }
     }
 }
