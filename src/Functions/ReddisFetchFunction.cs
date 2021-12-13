@@ -32,6 +32,8 @@ namespace HGV.Shivas.Fun
             var queries = new List<string>() { 
                 "https://www.reddit.com/r/dota2/search.json?q=selftext:%22ability%20draft%22&sort=new&restrict_sr=on",
                 "https://www.reddit.com/r/dota2/search.json?q=title:ability+draft&sort=new&restrict_sr=on",
+                "https://www.reddit.com/r/dota2/search.json?q=title:%22King%20of%20the%20Pool%22&sort=new&restrict_sr=on",
+                "https://www.reddit.com/r/dota2/search.json?q=selftext:%22King%20of%20the%20Pool%22&sort=new&restrict_sr=on",
             };
 
             foreach (var url in queries)
