@@ -29,11 +29,11 @@ namespace HGV.Shivas.Fun
             ILogger log)
         {
             var docs = new HashSet<RedditDocument>();
-            var queries = new List<string>() { 
+            var queries = new List<string>() {
+                "https://www.reddit.com/r/abilitydraft/top.json?limit=100",
+                "https://www.reddit.com/r/dota2/search.json?q=selftext:%22ability%20draft%22&sort=new&restrict_sr=on",
                 "https://www.reddit.com/r/dota2/search.json?q=selftext:%22ability%20draft%22&sort=new&restrict_sr=on",
                 "https://www.reddit.com/r/dota2/search.json?q=title:ability+draft&sort=new&restrict_sr=on",
-                "https://www.reddit.com/r/dota2/search.json?q=title:%22King%20of%20the%20Pool%22&sort=new&restrict_sr=on",
-                "https://www.reddit.com/r/dota2/search.json?q=selftext:%22King%20of%20the%20Pool%22&sort=new&restrict_sr=on",
             };
 
             foreach (var url in queries)
