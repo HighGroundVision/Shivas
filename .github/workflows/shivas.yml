@@ -7,28 +7,24 @@ env:
   AZURE_FUNCTIONAPP_NAME: shivas
   AZURE_FUNCTIONAPP_PACKAGE_PATH: src\published
   CONFIGURATION: Release
-  DOTNET_CORE_VERSION: 3.1.x
+  DOTNET_CORE_VERSION: 6.0.x
   WORKING_DIRECTORY: src
   DOTNET_CORE_VERSION_INPROC: ''
 jobs:
   build-and-deploy:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-    - name: Setup .NET Core (for inproc extensions)
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ env.DOTNET_CORE_VERSION_INPROC }}
     - name: Restore
-      run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+      run: dotnet restore 
     - name: Build
-      run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+      run: dotnet build --configuration Release --no-restore
     - name: Publish
-      run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}"
+      run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration Release --no-build --output "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}"
     - name: Deploy to Azure Function App
       uses: Azure/functions-action@v1
       with:
