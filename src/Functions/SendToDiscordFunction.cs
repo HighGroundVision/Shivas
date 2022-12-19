@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
@@ -22,25 +24,18 @@ namespace HGV.Shivas.Fun
         }
 
         [FunctionName(nameof(SendToDiscordFunctionRun))]
-        public void SendToDiscordFunctionRun(
-            [BlobTrigger("shivas/{id}.json", Connection = "AzureWebJobsStorage")]Stream stream, 
+        public async Task SendToDiscordFunctionRun(
+            [BlobTrigger("shivas/{id}.json", Connection = "AzureWebJobsStorage")] BlobClient client, 
             ILogger log)
         {
-            if(stream is null)
-                return;
+            if (client is null) throw new ArgumentNullException(nameof(BlobClient));
 
-            using (var sr = new StreamReader(stream))
-            using (var reader = new JsonTextReader(sr))
-            {
-                var serializer = new JsonSerializer();
-                var doc = serializer.Deserialize<RedditDocument>(reader);
-
-                if(doc is null)
-                    return;
-
-                var msg = new { content = $"There is a new AD Post check it out! {doc.url}" };
-                this.client.PostAsJsonAsync(discordWebhook, msg);
-            }
+            var reponse = await client.DownloadContentAsync();
+            var json = reponse?.Value?.Content?.ToString() ?? throw new InvalidOperationException("DownloadContentAsync");
+            var doc = JsonConvert.DeserializeObject<RedditDocument>(json) ?? throw new InvalidOperationException("DeserializeObject");
+            
+            var msg = new { content = $"There is a new AD Post check it out! {doc.url}" };
+            await this.client.PostAsJsonAsync(discordWebhook, msg);
         }
     }
 }

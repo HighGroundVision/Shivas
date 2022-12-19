@@ -1,5 +1,9 @@
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -12,24 +16,23 @@ namespace HGV.Shivas.Fun
         [FunctionName(nameof(StoreRedditPostFunctionAdd))]
         public async Task StoreRedditPostFunctionAdd(
             [QueueTrigger("shivas", Connection = "AzureWebJobsStorage")]RedditDocument doc,
-            [Blob("shivas/{id}.json", FileAccess.Write, Connection = "AzureWebJobsStorage")] Stream stream,
+            [Blob("shivas/{id}.json", FileAccess.ReadWrite, Connection = "AzureWebJobsStorage")] BlobClient client,
             ILogger log
         )
         {
-            try
-            {
-                if (doc is null)
-                    return;
+            if (doc is null) throw new ArgumentNullException(nameof(RedditDocument));
+            if (client is null) throw new ArgumentNullException(nameof(CloudBlockBlob));
 
-                var json = JsonConvert.SerializeObject(doc);
-                var writer = new StreamWriter(stream);
-                await writer.WriteAsync(json);
-
-            }
-            catch (Exception ex)
+            var exists = await client.ExistsAsync();
+            if (exists)
             {
-                log.LogError(ex, "Blob Already Exists");
+                log.LogWarning("Reddit Document Already Exists");
+                return;
             }
+
+            var json = JsonConvert.SerializeObject(doc);
+            var data = new BinaryData(json);
+            await client.UploadAsync(data);
         }
     }
 }

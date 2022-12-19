@@ -30,8 +30,7 @@ namespace HGV.Shivas.Fun
         {
             var docs = new HashSet<RedditDocument>();
             var queries = new List<string>() {
-                "https://www.reddit.com/r/abilitydraft/top.json?limit=100",
-                "https://www.reddit.com/r/dota2/search.json?q=selftext:%22ability%20draft%22&sort=new&restrict_sr=on",
+                "https://www.reddit.com/r/Abilitydraft/hot.json?limit=100&sort=new",
                 "https://www.reddit.com/r/dota2/search.json?q=selftext:%22ability%20draft%22&sort=new&restrict_sr=on",
                 "https://www.reddit.com/r/dota2/search.json?q=title:ability+draft&sort=new&restrict_sr=on",
             };
